@@ -3,6 +3,9 @@ use std::io::{stderr, stdout, Write};
 mod vec3;
 mod color;
 mod ray;
+mod hittable;
+mod sphere;
+mod hittable_list;
 
 use vec3::Vec3;
 use color::Color;
@@ -11,15 +14,15 @@ use ray::Ray;
 fn hit_sphere(center: &Vec3, radius: f64, r: &Ray) -> f64 {
     let oc = *center - *r.origin();
     // quadratic equation
-    let a = r.direction().dot(r.direction());
-    let b = r.direction().dot(&oc) * -2.0;
-    let c = oc.dot(&oc) - radius*radius;
-    let discriminant = b*b - 4.0*a*c;
+    let a = r.direction().length_squared();
+    let h = r.direction().dot(&oc);
+    let c = oc.length_squared() - radius*radius;
+    let discriminant = h*h - a*c;
 
     if discriminant < 0.0 {
         return -1.0;
     } else {
-        return (-b - f64::sqrt(discriminant)) / (2.0*a);
+        return (h - f64::sqrt(discriminant)) / a;
     }
 }
 
