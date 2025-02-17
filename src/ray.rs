@@ -1,7 +1,7 @@
 use super::vec3::Vec3;
 
 #[derive(Default)]
-struct Ray {
+pub struct Ray {
     orig: Vec3,
     dir: Vec3,
 }

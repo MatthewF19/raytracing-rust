@@ -30,6 +30,12 @@ impl Vec3 {
     pub fn unit_vector(&self) -> Self {
         return *self / self.length();
     }
+
+    pub fn dot(&self, other: &Self) -> f64 {
+        return self.e[0]*other.e[0] +
+               self.e[1]*other.e[1] +
+               self.e[2]*other.e[2];
+    }
 }
 
 impl std::ops::Neg for Vec3 {
@@ -55,7 +61,16 @@ impl std::ops::Add<Vec3> for Vec3 {
     }
 }
 
-// scalen by constant
+impl std::ops::Sub<Vec3> for Vec3 {
+    type Output = Self;
+    fn sub(self, rhs: Vec3) -> Self::Output {
+        Self {e: [self.e[0] - rhs.e[0],
+                  self.e[1] - rhs.e[1],
+                  self.e[2] - rhs.e[2]]}
+    }
+}
+
+// scale by constant
 impl std::ops::Mul<f64> for Vec3 {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self::Output {
