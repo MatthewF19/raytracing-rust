@@ -2,13 +2,13 @@ use crate::hittable::*;
 use crate::ray::Ray;
 use crate::Vec3;
 
-struct Sphere {
+pub struct Sphere {
     center: Vec3,
     radius: f64,
 }
 
 impl Sphere {
-    fn new(center: &Vec3, radius: f64) -> Self {
+    pub fn new(center: &Vec3, radius: f64) -> Self {
         Self { center: *center, radius: radius.max(0.0) }
     }
 }

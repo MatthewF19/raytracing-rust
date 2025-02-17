@@ -1,20 +1,20 @@
 use crate::hittable::*;
 
 #[derive(Default)]
-struct HittableList {
+pub struct HittableList {
     objects: Vec<Box<dyn Hittable>>, 
 }
 
 impl HittableList {
-    fn new(object: Box<dyn Hittable>) -> Self {
+    pub fn new(object: Box<dyn Hittable>) -> Self {
         Self { objects: vec![object] }
     }
 
-    fn clear(&mut self) {
+    pub fn clear(&mut self) {
         self.objects.clear();
     }
 
-    fn add(&mut self, object: Box<dyn Hittable>) {
+    pub fn add(&mut self, object: Box<dyn Hittable>) {
         self.objects.push(object);
     }
 }
@@ -26,7 +26,7 @@ impl Hittable for HittableList {
         let mut closest = ray_tmax;
 
         for object in self.objects.iter() {
-            if object.hit(r, ray_tmin, ray_tmax, &mut temp_record) {
+            if object.hit(r, ray_tmin, closest, &mut temp_record) {
                 hit_anything = true;
                 closest = temp_record.t;
                 *rec = temp_record.clone();

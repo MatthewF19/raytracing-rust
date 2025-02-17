@@ -6,11 +6,16 @@ mod ray;
 mod hittable;
 mod sphere;
 mod hittable_list;
+mod libs;
 
+use hittable::*;
 use vec3::Vec3;
 use color::Color;
 use ray::Ray;
+use hittable_list::HittableList;
+use sphere::Sphere;
 
+/*
 fn hit_sphere(center: &Vec3, radius: f64, r: &Ray) -> f64 {
     let oc = *center - *r.origin();
     // quadratic equation
@@ -25,13 +30,12 @@ fn hit_sphere(center: &Vec3, radius: f64, r: &Ray) -> f64 {
         return (h - f64::sqrt(discriminant)) / a;
     }
 }
+*/
 
-fn ray_color(r: &Ray) -> Color {
-    // t is the point where the ray hit the sphere 
-    let t = hit_sphere(&Vec3::new(0.0, 0.0, -1.0), 0.5, r);
-    if t > 0.0 {
-        let N = (r.at(t) - Vec3::new(0.0, 0.0, -1.0)).unit_vector();
-        return Color::new(N.x()+1.0, N.y()+1.0, N.z()+1.0)*0.5;
+fn ray_color<H: Hittable>(r: &Ray, world: &H) -> Color {
+    let mut rec = HitRecord::default();
+    if world.hit(r, 0.0, libs::INFINITY, &mut rec) {
+        return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5;
     }
 
     let unit_dir = r.direction().unit_vector();
@@ -46,6 +50,11 @@ fn main() -> Result<(), std::io::Error> {
     // make sure img height is at least 1
     let mut img_height = (img_width as f64 / aspect_ratio) as i32;
     img_height = if img_height < 1 { 1 } else { img_height };
+
+    // world
+    let mut world = HittableList::default();
+    world.add(Box::new(Sphere::new(&Vec3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Box::new(Sphere::new(&Vec3::new(0.0, -100.5, -1.0), 100.0)));
 
     // camera settings
     let focal_length = 1.0;
@@ -76,7 +85,7 @@ fn main() -> Result<(), std::io::Error> {
             let ray_dir = pixel_center - camera_center;
             let r = Ray::new(camera_center, ray_dir);
 
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r, &world);
             pixel_color.write_color(&mut out);
         }
     }
