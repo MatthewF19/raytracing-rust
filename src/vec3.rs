@@ -60,8 +60,15 @@ impl Vec3 {
         }
     }
 
-    pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+    pub fn reflect(v: &Self, n: &Self) -> Self {
         (*v) - (2.0*v.dot(n)*(*n))
+    }
+
+    pub fn refract(uv: &Self, n: &Self, etaI_over_etaT: f64) -> Self {
+        let cos_theta = f64::min((-*uv).dot(n), 1.0); 
+        let r_out_perp = etaI_over_etaT * (*uv + cos_theta * *n);
+        let r_out_parallel = -f64::sqrt(f64::abs(1.0 - r_out_perp.length_squared())) * *n;
+        return r_out_perp + r_out_parallel;
     }
 
     pub fn dot(&self, other: &Self) -> f64 {
