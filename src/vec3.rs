@@ -1,6 +1,6 @@
 use crate::libs::*;
 
-#[derive(Default, Clone, Copy)]
+#[derive(Default, Clone, Copy, Debug)]
 pub struct Vec3 {
     e: [f64; 3],
 }
@@ -29,6 +29,13 @@ impl Vec3 {
         self.e[2] * self.e[2]
     }
 
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        return (f64::abs(self.e[0]) < s) &&
+               (f64::abs(self.e[1]) < s) &&
+               (f64::abs(self.e[2]) < s);
+    }
+
     pub fn unit_vector(&self) -> Self {
         return *self / self.length();
     }
@@ -53,10 +60,20 @@ impl Vec3 {
         }
     }
 
+    pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+        (*v) - (2.0*v.dot(n)*(*n))
+    }
+
     pub fn dot(&self, other: &Self) -> f64 {
         return self.e[0]*other.e[0] +
                self.e[1]*other.e[1] +
                self.e[2]*other.e[2];
+    }
+
+    pub fn cross(&self, other: &Self) -> Self {
+        Self {e: [self.e[1] * other.e[2] - self.e[2] * other.e[1],
+                  self.e[2] * other.e[0] - self.e[0] * other.e[2],
+                  self.e[0] * other.e[1] - self.e[1] * other.e[1]]}
     }
 
     pub fn random() -> Self {
@@ -134,13 +151,12 @@ impl std::ops::MulAssign<f64> for Vec3 {
     }
 }
 
-// cross product
 impl std::ops::Mul<Vec3> for Vec3 {
     type Output = Self;
     fn mul(self, rhs: Vec3) -> Self::Output {
-        Self {e: [self.e[1] * rhs.e[2] - self.e[2] * rhs.e[1],
-                  self.e[2] * rhs.e[0] - self.e[0] * rhs.e[2],
-                  self.e[0] * rhs.e[1] - self.e[1] * rhs.e[1]]}
+        Vec3::new(self.e[0] * rhs.e[0],
+                  self.e[1] * rhs.e[1],
+                  self.e[2] * rhs.e[2])
     }
 }
 impl std::ops::MulAssign<Vec3> for Vec3 {

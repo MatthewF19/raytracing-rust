@@ -8,6 +8,7 @@ use crate::HitRecord;
 use crate::Interval;
 use crate::libs;
 use crate::libs::*;
+use crate::Metal;
 
 pub struct Camera {
     pub aspect_ratio: f64,
@@ -114,9 +115,15 @@ impl Camera {
         }
 
         let mut rec = HitRecord::default();
+
         if world.hit(r, Interval::new(0.001, libs::INFINITY), &mut rec) {
-            let direction = Vec3::random_on_hemisphere(&rec.normal);
-            return 0.5 * Camera::ray_color(&Ray::new(rec.p, direction), depth-1, world);
+            let mut scattered = Ray::default();
+            let mut attenuation = Color::default();
+            if rec.mat.scatter(r, &rec, &mut attenuation, &mut scattered) {
+                return attenuation * Self::ray_color(&scattered, depth-1, world);
+            }
+
+            return Color::new(0.0, 0.0, 0.0);
         }
 
         let unit_dir = r.direction().unit_vector();
