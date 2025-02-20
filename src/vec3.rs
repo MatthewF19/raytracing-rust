@@ -40,9 +40,9 @@ impl Vec3 {
         return *self / self.length();
     }
 
-    pub fn random_unit_vector() -> Vec3 {
+    pub fn random_unit_vector() -> Self {
         loop {
-            let p = Vec3::random();
+            let p = Self::random();
             let len_sq = p.length_squared();
             // 1e-50 to account for floating point errors
             if 1e-50 < len_sq && len_sq <= 1.0 {
@@ -51,12 +51,20 @@ impl Vec3 {
         }
     }
 
-    pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
-        let on_unit_sphere = Vec3::random_unit_vector();
+    pub fn random_on_hemisphere(normal: &Self) -> Self {
+        let on_unit_sphere = Self::random_unit_vector();
         if on_unit_sphere.dot(normal) > 0.0 {
             return on_unit_sphere;
         } else {
             return -on_unit_sphere;
+        }
+    }
+
+    pub fn random_in_unit_disk() -> Self {
+        // generate points until one lies in the disk radius
+        loop {
+            let p = Vec3::new(rand_range(-1.0, 1.0), rand_range(-1.0, 1.0), 0.0);
+            if p.length_squared() < 1.0 { return p; }
         }
     }
 

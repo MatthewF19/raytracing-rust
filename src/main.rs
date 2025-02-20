@@ -46,10 +46,13 @@ fn main() -> Result<(), std::io::Error> {
     cam.samples_per_pixel = 100;
     cam.max_depth = 50;
 
-    cam.vfov = 90.0;
+    cam.vfov = 20.0;
     cam.lookfrom = Vec3::new(-2.0, 2.0, 1.0);
     cam.lookat = Vec3::new(0.0, 0.0, -1.0);
     cam.vup = Vec3::new(0.0, 1.0, 0.0);
+
+    cam.defocus_angle = 10.0;
+    cam.focus_dist = 3.4;
 
     cam.render(&world)?;
 
