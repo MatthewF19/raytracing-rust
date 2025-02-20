@@ -13,6 +13,23 @@ impl Color {
         }
     }
 
+    pub fn correct_color(&self) -> [u8; 3] {
+        let mut r = self.x();
+        let mut g = self.y();
+        let mut b = self.z();
+
+        r = Color::linear_to_gamma(r);
+        g = Color::linear_to_gamma(g);
+        b = Color::linear_to_gamma(b);
+
+        let intensity = Interval::new(0.0, 0.999);
+        let rbyte = (255.999 * intensity.clamp(r)) as u8;
+        let gbyte = (255.999 * intensity.clamp(g)) as u8;
+        let bbyte = (255.999 * intensity.clamp(b)) as u8;
+
+        return [rbyte, gbyte, bbyte];
+    }
+
     pub fn write_color(&self, file: &mut dyn Write) {
         let mut r = self.x();
         let mut g = self.y();

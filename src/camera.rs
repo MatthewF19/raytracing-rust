@@ -1,4 +1,5 @@
 use std::io::{stdout, stderr, Write};
+use show_image::{ImageView, ImageInfo, create_window};
 
 use crate::color::Color;
 use crate::ray::Ray;
@@ -76,6 +77,9 @@ impl Camera {
     pub fn render<H: Hittable>(&mut self, world: &H) -> Result<(), std::io::Error> {
         self.initialize(); 
 
+        let mut data = vec![0; 3 * self.img_height as usize * self.img_width as usize];
+
+        /*
         print!("P3\n{} {}\n255\n", self.img_width, self.img_height);
 
         let mut err = stderr();
@@ -95,6 +99,48 @@ impl Camera {
             }
         }
         err.write(b"\rDone.                 \n")?;
+        */
+
+        let mut err = stderr();
+        let mut out = stdout();
+        let mut data_idx = 0;
+        for j in 0..self.img_height {
+            let buff = format!("\rScanlines remaining: {} ", self.img_height-j);
+            err.write(buff.as_bytes())?;
+            for i in 0..self.img_width {
+                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+                for _sample in 0..self.samples_per_pixel {
+                    let r = self.get_ray(i, j); 
+                    pixel_color += Self::ray_color(&r, self.max_depth, world);
+                }
+
+                pixel_color = pixel_color * self.pixel_samples_scale;
+
+                let result = pixel_color.correct_color();
+                data[data_idx] = result[0];
+                data[data_idx+1] = result[1];
+                data[data_idx+2] = result[2];
+                data_idx += 3;
+            }
+        }
+
+        err.write(b"\rDone.                 \n")?;
+        let _ = self.display(&data);
+
+        Ok(())
+    }
+
+    fn display(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+        let image = ImageView::new(ImageInfo::rgb8(self.img_width as u32, self.img_height as u32), data);
+
+        // Create a window with default options and display the image.
+        let window = create_window("image", Default::default())?;
+        window.set_image("image-001", image)?;
+
+        // LOOP FOREVER TO NOT CLOSE WINDOW
+        loop {
+
+        }
 
         Ok(())
     }

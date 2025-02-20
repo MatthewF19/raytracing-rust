@@ -9,7 +9,10 @@ mod interval;
 mod camera;
 mod material;
 
+use std::io::{stderr, Write};
 use std::rc::Rc;
+use std::time::{SystemTime, UNIX_EPOCH};
+use std::env;
 
 use vec3::Vec3;
 use color::*;
@@ -22,7 +25,10 @@ use interval::Interval;
 use camera::Camera;
 use material::*;
 
+#[show_image::main]
 fn main() -> Result<(), std::io::Error> {
+    env::set_var("RUST_BACKTRACE", "full");
+
     // world
     let mut world = HittableList::default();
 
@@ -81,19 +87,23 @@ fn main() -> Result<(), std::io::Error> {
     let mut cam = Camera::default();
 
     cam.aspect_ratio = 16.0 / 9.0;
-    cam.img_width = 1920;
-    cam.samples_per_pixel = 50;
-    cam.max_depth = 50;
+    cam.img_width = 1200;
+    cam.samples_per_pixel = 10;
+    cam.max_depth = 8;
 
     cam.vfov = 20.0;
     cam.lookfrom = Vec3::new(13.0, 2.0, 3.0);
     cam.lookat = Vec3::new(0.0, 0.0, 0.0);
     cam.vup = Vec3::new(0.0, 1.0, 0.0);
 
-    cam.defocus_angle =0.6;
+    cam.defocus_angle = 0.6;
     cam.focus_dist = 10.0;
 
+    let start_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
     cam.render(&world)?;
+    let end_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+
+    stderr().write_all(format!{"execution took: {:?}\n", end_time - start_time}.as_bytes())?;
 
     Ok(())
 }
