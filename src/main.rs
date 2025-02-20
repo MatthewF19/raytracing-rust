@@ -1,5 +1,3 @@
-use std::rc::*;
-
 mod vec3;
 mod color;
 mod ray;
@@ -11,12 +9,15 @@ mod interval;
 mod camera;
 mod material;
 
+use std::rc::Rc;
+
 use vec3::Vec3;
 use color::*;
 use ray::Ray;
 use hittable::*;
 use sphere::Sphere;
 use hittable_list::HittableList;
+use libs::*;
 use interval::Interval;
 use camera::Camera;
 use material::*;
@@ -26,7 +27,7 @@ fn main() -> Result<(), std::io::Error> {
     let mut world = HittableList::default();
 
     let material_ground = Rc::new(Lambertian::new(&Color::new(0.8, 0.8, 0.0)));
-    let material_center = Rc::new(Lambertian::new(&Color::new(0.1, 0.2, 0.5)));
+    let material_center = Rc::new(Lambertian::new(&Color::new(0.7, 0.4697, 0.7)));
     let material_left = Rc::new(Dielectric::new(1.5));
     // relative ior: ratio of air to glass
     let material_bubble = Rc::new(Dielectric::new(1.0/1.5));
@@ -42,7 +43,13 @@ fn main() -> Result<(), std::io::Error> {
 
     cam.aspect_ratio = 16.0 / 9.0;
     cam.img_width = 400;
-    cam.samples_per_pixel = 10;
+    cam.samples_per_pixel = 100;
+    cam.max_depth = 50;
+
+    cam.vfov = 90.0;
+    cam.lookfrom = Vec3::new(-2.0, 2.0, 1.0);
+    cam.lookat = Vec3::new(0.0, 0.0, -1.0);
+    cam.vup = Vec3::new(0.0, 1.0, 0.0);
 
     cam.render(&world)?;
 
