@@ -87,8 +87,8 @@ fn main() -> Result<(), std::io::Error> {
     let mut cam = Camera::default();
 
     cam.aspect_ratio = 16.0 / 9.0;
-    cam.img_width = 1200;
-    cam.samples_per_pixel = 20;
+    cam.img_width = 400;
+    cam.samples_per_pixel = 32;
     cam.max_depth = 8;
 
     cam.vfov = 20.0;

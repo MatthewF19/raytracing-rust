@@ -1,3 +1,5 @@
+use core::time;
+use std::thread;
 use std::io::{stdout, stderr, Write};
 use show_image::{ImageView, ImageInfo, create_window};
 
@@ -103,6 +105,7 @@ impl Camera {
 
         let mut err = stderr();
         let mut out = stdout();
+        let window = create_window("image", Default::default()).unwrap();
         let mut data_idx = 0;
         for j in 0..self.img_height {
             let buff = format!("\rScanlines remaining: {} ", self.img_height-j);
@@ -122,25 +125,16 @@ impl Camera {
                 data[data_idx+2] = result[2];
                 data_idx += 3;
             }
+
+            let image = ImageView::new(ImageInfo::rgb8(self.img_width as u32, self.img_height as u32), &data);
+            let _ = window.set_image("image-001", image);
         }
 
         err.write(b"\rDone.                 \n")?;
-        let _ = self.display(&data);
+        // let _ = self.display(&data);
 
-        Ok(())
-    }
-
-    fn display(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
-        let image = ImageView::new(ImageInfo::rgb8(self.img_width as u32, self.img_height as u32), data);
-
-        // Create a window with default options and display the image.
-        let window = create_window("image", Default::default())?;
-        window.set_image("image-001", image)?;
-
-        // LOOP FOREVER TO NOT CLOSE WINDOW
-        loop {
-
-        }
+        // LOOP TO STOP WINDOW FROM CLOSING
+        loop { }
 
         Ok(())
     }
