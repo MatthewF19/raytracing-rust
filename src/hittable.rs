@@ -5,6 +5,7 @@ use crate::Vec3;
 use crate::Interval;
 use crate::material::*;
 use crate::color::*;
+use crate::aabb::*;
 
 #[derive(Clone)]
 pub struct HitRecord {
@@ -37,4 +38,6 @@ impl HitRecord {
 
 pub trait Hittable {
     fn hit(&self, r: &Ray, ray_t: Interval, rec: &mut HitRecord) -> bool;
+
+    fn bounding_box(&self) -> &AABB;
 }

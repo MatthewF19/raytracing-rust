@@ -6,16 +6,20 @@ use crate::Vec3;
 use crate::interval::*;
 use crate::material::*;
 use crate::color::*;
+use crate::aabb::AABB;
 
 pub struct Sphere {
     center: Vec3,
     radius: f64,
-    mat: Rc<dyn Material>
+    mat: Rc<dyn Material>,
+    bbox: AABB,
 }
 
 impl Sphere {
     pub fn new(center: &Vec3, radius: f64, mat: Rc<dyn Material>) -> Self {
-        Self { center: *center, radius: radius.max(0.0), mat }
+        let rvec = Vec3::new(radius, radius, radius);
+        Self { center: *center, radius: radius.max(0.0), mat, 
+               bbox: AABB::from_points(*center-rvec, *center+rvec) }
     }
 }
 
@@ -52,5 +56,9 @@ impl Hittable for Sphere {
         rec.mat = self.mat.clone();
 
         return true;
+    }
+
+    fn bounding_box(&self) -> &AABB {
+        &self.bbox
     }
 }

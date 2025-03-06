@@ -1,21 +1,26 @@
+use std::rc::Rc;
+
 use crate::hittable::*;
 use crate::interval::*;
+use crate::aabb::*;
 
 #[derive(Default)]
 pub struct HittableList {
-    objects: Vec<Box<dyn Hittable>>, 
+    pub objects: Vec<Rc<dyn Hittable>>, 
+    pub bbox:    AABB,
 }
 
 impl HittableList {
-    pub fn new(object: Box<dyn Hittable>) -> Self {
-        Self { objects: vec![object] }
+    pub fn new(object: Rc<dyn Hittable>) -> Self {
+        Self { objects: vec![object], bbox: AABB::default() }
     }
 
     pub fn clear(&mut self) {
         self.objects.clear();
     }
 
-    pub fn add(&mut self, object: Box<dyn Hittable>) {
+    pub fn add(&mut self, object: Rc<dyn Hittable>) {
+        self.bbox = AABB::from_boxes(&self.bbox, object.bounding_box());
         self.objects.push(object);
     }
 }
@@ -35,5 +40,9 @@ impl Hittable for HittableList {
         }
 
         return hit_anything;
+    }
+
+    fn bounding_box(&self) -> &AABB {
+        &self.bbox
     }
 }

@@ -12,3 +12,7 @@ pub fn rand_double() -> f64 {
 pub fn rand_range(min: f64, max: f64) -> f64 {
     rand::random_range(min..max)
 }
+
+pub fn rand_int(min: i32, max: i32) -> i32 {
+    rand::random_range(min..=max)
+}

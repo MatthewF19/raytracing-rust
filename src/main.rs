@@ -8,6 +8,8 @@ mod libs;
 mod interval;
 mod camera;
 mod material;
+mod aabb;
+mod bvh_node;
 
 use std::io::{stderr, Write};
 use std::rc::Rc;
@@ -24,6 +26,7 @@ use libs::*;
 use interval::Interval;
 use camera::Camera;
 use material::*;
+use bvh_node::BvhNode;
 
 #[show_image::main]
 fn main() -> Result<(), std::io::Error> {
@@ -48,7 +51,7 @@ fn main() -> Result<(), std::io::Error> {
     */
 
     let ground_mat = Rc::new(Lambertian::new(&Color::new(0.5, 0.5, 0.5)));
-    world.add(Box::new(Sphere::new(&Vec3::new(0.0, -1000.0, 0.0), 1000.0, ground_mat)));
+    world.add(Rc::new(Sphere::new(&Vec3::new(0.0, -1000.0, 0.0), 1000.0, ground_mat)));
 
     for a in -11..11 {
         for b in -11..11 {
@@ -61,35 +64,37 @@ fn main() -> Result<(), std::io::Error> {
                 if mat < 0.8 {
                     let albedo = Color::random() * Color::random();
                     sphere_material = Rc::new(Lambertian::new(&albedo));
-                    world.add(Box::new(Sphere::new(&center, 0.2, sphere_material)));
+                    world.add(Rc::new(Sphere::new(&center, 0.2, sphere_material)));
                 } else if mat < 0.95 {
                     let albedo = Color::random_bounded(0.5, 1.0);
                     let fuzz = rand_range(0.0, 0.5);
                     sphere_material = Rc::new(Metal::new(&albedo, fuzz));
-                    world.add(Box::new(Sphere::new(&center, 0.2, sphere_material)));
+                    world.add(Rc::new(Sphere::new(&center, 0.2, sphere_material)));
                 } else {
                     sphere_material = Rc::new(Dielectric::new(1.333));
-                    world.add(Box::new(Sphere::new(&center, 0.2, sphere_material)));
+                    world.add(Rc::new(Sphere::new(&center, 0.2, sphere_material)));
                 }
             }
         }
     }
 
     let mat1 = Rc::new(Dielectric::new(1.333));
-    world.add(Box::new(Sphere::new(&Vec3::new(0.0, 1.0, 0.0), 1.0, mat1)));
+    world.add(Rc::new(Sphere::new(&Vec3::new(0.0, 1.0, 0.0), 1.0, mat1)));
 
     let mat2 = Rc::new(Lambertian::new(&Color::new(0.7, 0.4697, 0.7)));
-    world.add(Box::new(Sphere::new(&Vec3::new(-4.0, 1.0, 0.0), 1.0, mat2)));
+    world.add(Rc::new(Sphere::new(&Vec3::new(-4.0, 1.0, 0.0), 1.0, mat2)));
 
     let mat3 = Rc::new(Metal::new(&Color::new(0.7, 0.6, 0.5), 0.1));
-    world.add(Box::new(Sphere::new(&Vec3::new(4.0, 1.0, 0.0), 1.0, mat3)));
+    world.add(Rc::new(Sphere::new(&Vec3::new(4.0, 1.0, 0.0), 1.0, mat3)));
+
+    world = HittableList::new(Rc::new(BvhNode::from_hittable_list(world)));
 
     let mut cam = Camera::default();
 
     cam.aspect_ratio = 16.0 / 9.0;
-    cam.img_width = 400;
-    cam.samples_per_pixel = 10;
-    cam.max_depth = 8;
+    cam.img_width = 1200;
+    cam.samples_per_pixel = 50;
+    cam.max_depth = 12;
 
     cam.vfov = 20.0;
     cam.lookfrom = Vec3::new(13.0, 2.0, 3.0);
