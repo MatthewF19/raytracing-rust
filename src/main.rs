@@ -88,7 +88,7 @@ fn main() -> Result<(), std::io::Error> {
 
     cam.aspect_ratio = 16.0 / 9.0;
     cam.img_width = 400;
-    cam.samples_per_pixel = 32;
+    cam.samples_per_pixel = 10;
     cam.max_depth = 8;
 
     cam.vfov = 20.0;
@@ -99,11 +99,10 @@ fn main() -> Result<(), std::io::Error> {
     cam.defocus_angle = 0.6;
     cam.focus_dist = 10.0;
 
-    let start_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
     cam.render(&world)?;
-    let end_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 
-    stderr().write_all(format!{"execution took: {:?}\n", end_time - start_time}.as_bytes())?;
+    // printing done in render because loop occurs there
+    // stderr().write_all(format!{"execution took: {:?}\n", end_time - start_time}.as_bytes())?;
 
     Ok(())
 }

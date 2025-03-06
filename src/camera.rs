@@ -1,6 +1,7 @@
 use core::time;
 use std::thread;
 use std::io::{stdout, stderr, Write};
+use std::time::*;
 use show_image::{ImageView, ImageInfo, create_window};
 
 use crate::color::Color;
@@ -104,8 +105,9 @@ impl Camera {
         */
 
         let mut err = stderr();
-        let mut out = stdout();
         let window = create_window("image", Default::default()).unwrap();
+
+        let start_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
         let mut data_idx = 0;
         for j in 0..self.img_height {
             let buff = format!("\rScanlines remaining: {} ", self.img_height-j);
@@ -130,7 +132,8 @@ impl Camera {
             let _ = window.set_image("image-001", image);
         }
 
-        err.write(b"\rDone.                 \n")?;
+        let end_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        err.write(format!{"\rDone!                 \nExecution took: {:?}\n", end_time - start_time}.as_bytes())?;
         // let _ = self.display(&data);
 
         // LOOP TO STOP WINDOW FROM CLOSING

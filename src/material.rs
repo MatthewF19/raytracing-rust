@@ -69,7 +69,7 @@ impl Material for Lambertian {
 
 impl Material for Metal {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool {
-        let mut reflected = Vec3::reflect(r_in.direction(), &rec.normal);
+        let mut reflected = Vec3::reflect(&r_in.direction(), &rec.normal);
         reflected = reflected.unit_vector() + (self.fuzz * Vec3::random_unit_vector());
         
         *scattered = Ray::new(rec.p, reflected);
