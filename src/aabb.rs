@@ -1,4 +1,4 @@
-use crate::{ray::Ray, vec3::Vec3, Interval};
+use crate::{interval::{self, *}, ray::Ray, vec3::Vec3};
 
 #[derive(Default)]
 pub struct AABB {
@@ -9,7 +9,9 @@ pub struct AABB {
 
 impl AABB {
     pub fn new(x: Interval, y: Interval, z: Interval) -> Self {
-        Self { x, y, z }
+        let mut aabb = Self { x, y, z };
+        aabb.pad_to_min();
+        return aabb;
     }
 
     pub fn from_points(a: Vec3, b: Vec3) -> Self {
@@ -17,7 +19,9 @@ impl AABB {
         let y = if a.y() <= b.y() { Interval::new(a.y(), b.y()) } else { Interval::new(b.y(), a.y()) };
         let z = if a.z() <= b.z() { Interval::new(a.z(), b.z()) } else { Interval::new(b.z(), a.z()) };
 
-        Self { x, y, z }
+        let mut aabb = Self { x, y, z };
+        aabb.pad_to_min();
+        return aabb;
     }
 
     pub fn from_boxes(box0: &AABB, box1: &AABB) -> Self {
@@ -25,7 +29,16 @@ impl AABB {
         let y = Interval::from_intervals(&box0.y, &box1.y);
         let z = Interval::from_intervals(&box0.z, &box1.z);
         
-        Self { x, y, z }
+        let mut aabb = Self { x, y, z };
+        aabb.pad_to_min();
+        return aabb;
+    }
+
+    fn pad_to_min(&mut self) {
+        let delta = 0.0001;
+        if self.x.size() < delta { self.x.expand(delta); }
+        if self.y.size() < delta { self.y.expand(delta); }
+        if self.z.size() < delta { self.z.expand(delta); }
     }
 
     pub fn axis_interval(&self, n: i32) -> &Interval {
@@ -59,5 +72,21 @@ impl AABB {
         }
 
         return true;
+    }
+
+    pub fn longest_axis(&self) -> i32 {
+        if self.x.size() > self.y.size() {
+            return if self.x.size() > self.z.size() { 0 } else { 2 };
+        } else {
+            return if self.y.size() > self.z.size() { 1 } else { 2 };
+        }
+    }
+
+    pub fn empty() -> Self {
+        Self::new(Interval::EMPTY(), Interval::EMPTY(), Interval::EMPTY())
+    }
+
+    pub fn universe() -> Self {
+        Self::new(Interval::UNIVERSE(), Interval::UNIVERSE(), Interval::UNIVERSE())
     }
 }

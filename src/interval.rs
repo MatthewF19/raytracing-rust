@@ -44,11 +44,17 @@ impl Interval {
         return x;
     }
 
-    pub fn expand(&self, delta: f64) -> Self {
+    pub fn expand(&mut self, delta: f64) {
         let padding = delta/2.0;
-        Self { min: self.min-padding, max: self.max+padding }
+        self.min = self.min-padding;
+        self.max = self.max+padding;
+    }
+
+    pub const fn EMPTY() -> Self {
+        Interval { min: f64::INFINITY, max: f64::NEG_INFINITY }
+    }
+
+    pub const fn UNIVERSE() -> Self {
+        Interval { min: f64::NEG_INFINITY, max: f64::INFINITY }
     }
 }
-
-const EMPTY: Interval = Interval { min: f64::INFINITY, max: f64::NEG_INFINITY };
-const UNIVERSE: Interval = Interval { min: f64::NEG_INFINITY, max: f64::INFINITY };

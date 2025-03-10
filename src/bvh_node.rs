@@ -23,7 +23,12 @@ impl BvhNode {
     }
 
     pub fn new(objects: &mut Vec<Rc<dyn Hittable>>, start: usize, end: usize) -> Self {
-        let axis = rand_int(0, 2);
+        let mut bbox = AABB::empty();
+        for obj_idx in start..end {
+            bbox = AABB::from_boxes(&bbox, objects[obj_idx].bounding_box());
+        }
+        let axis = bbox.longest_axis();
+
         let comparator = match axis {
             0 => Self::box_x_compare,
             1 => Self::box_y_compare,
@@ -46,8 +51,7 @@ impl BvhNode {
             right = Rc::new(Self::new(objects, mid, end));
         }
 
-        Self { left: left.clone(), right: right.clone(), 
-               bbox: AABB::from_boxes(left.bounding_box(), right.bounding_box()) }
+        Self { left: left.clone(), right: right.clone(), bbox }
     }
 
     fn box_compare(a: Rc<dyn Hittable>, b: Rc<dyn Hittable>, axis_idx: i32) -> Ordering {

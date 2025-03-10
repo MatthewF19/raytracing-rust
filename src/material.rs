@@ -37,11 +37,12 @@ impl Metal {
 
 pub struct Dielectric {
     ior: f64,
+    fuzz: f64,
 }
 
 impl Dielectric {
-    pub fn new(ior: f64) -> Self {
-        Self { ior }
+    pub fn new(ior: f64, fuzz: f64) -> Self {
+        Self { ior, fuzz }
     }
 
     // Schlik approximation for reflectance
@@ -88,7 +89,7 @@ impl Material for Dielectric {
         let sin_theta = f64::sqrt(1.0 - cos_theta*cos_theta);
 
         let cannot_refract = ri * sin_theta > 1.0;
-        let dir: Vec3;
+        let mut dir: Vec3;
 
         if cannot_refract || (Dielectric::reflectance(cos_theta, ri) > rand_double()) {
             dir = Vec3::reflect(&unit_dir, &rec.normal);
@@ -96,6 +97,7 @@ impl Material for Dielectric {
             dir = Vec3::refract(&unit_dir, &rec.normal, ri);
         }
 
+        dir += Vec3::random_unit_vector() * self.fuzz;
         *scattered = Ray::new(rec.p, dir);
         return true;
     }
